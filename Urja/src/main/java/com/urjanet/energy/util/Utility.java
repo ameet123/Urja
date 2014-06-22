@@ -3,6 +3,8 @@ package com.urjanet.energy.util;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import javax.annotation.PostConstruct;
 
@@ -19,8 +21,9 @@ import com.google.common.io.CharStreams;
 import com.google.gson.Gson;
 
 /**
- * combination of Component and PostConstruct allow us to wire a bean
- * in static context.
+ * combination of Component and PostConstruct allow us to wire a bean in static
+ * context.
+ * 
  * @author ac2211
  *
  */
@@ -41,36 +44,52 @@ public class Utility {
 		gson = thisGson;
 		hclient = theHclient;
 	}
-	
+
+	/**
+	 * fetch JSON data from already existing file
+	 * @param file
+	 * @return JSON string
+	 */
+	public static String fetchFromFile(String file) {
+		try {
+			return new String(Files.readAllBytes(Paths.get(file)));
+		} catch (IOException e) {
+			return "";
+		}
+	}
+
 	/**
 	 * fetch an HTTP page based on uri
+	 * 
 	 * @param uri
 	 * @return String
 	 */
-	public static String fetchHttp(String uri){
+	public static String fetchHttp(String uri) {
 		String text = null;
 		HttpGet rateGet = new HttpGet(uri);
 		try {
 			CloseableHttpResponse rateResponse = hclient.execute(rateGet);
-			HttpEntity rateEntity = rateResponse.getEntity();			
+			HttpEntity rateEntity = rateResponse.getEntity();
 			try (final Reader reader = new InputStreamReader(
 					rateEntity.getContent())) {
 				text = CharStreams.toString(reader);
 			}
-			LOGGER.debug("First few lines:{}",text.substring(0, 100));
+			LOGGER.debug("First few lines:{}", text.substring(0, 100));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return text;
 	}
+
 	/**
 	 * convert a json string to appropriate object
+	 * 
 	 * @param json
 	 * @param clazz
 	 * @return JSON String converted to class
 	 */
-	public static <T> T fromJson(String json, Class<T> clazz){
-		return gson.fromJson(json, clazz);		
+	public static <T> T fromJson(String json, Class<T> clazz) {
+		return gson.fromJson(json, clazz);
 	}
 }

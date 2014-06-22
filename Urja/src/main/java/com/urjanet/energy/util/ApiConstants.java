@@ -7,6 +7,8 @@ package com.urjanet.energy.util;
  */
 public class ApiConstants {
 
+	public static final String UTIL_RATE_JSON_FILE = "/home/ac2211/Urja/energy/energyOrig.json";
+	public static final String UTIL_COMP_JSON_FILE = "/home/ac2211/Urja/energy/comp.json";
 	/**
 	 * full detailed utility rates in csv
 	 */

@@ -25,6 +25,5 @@ public class Constants {
 
 	public static final String PROPERTY_NAME_MESSAGESOURCE_BASENAME = "message.source.basename";
 	public static final String PROPERTY_NAME_MESSAGESOURCE_USE_CODE_AS_DEFAULT_MESSAGE = "message.source.use.code.as.default.message";
-	public static final String UTILITY_RATE_JSON_FILE = "/home/ac2211/Urja/energy/energyOrig.json";
 
 }

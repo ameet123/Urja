@@ -2,6 +2,7 @@ package com.urjanet.energy.entity;
 
 import java.sql.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -31,7 +32,9 @@ public class UtilityRates {
 	private Date endDate;
 	private String utility;
 	private String sector;
+	@Column(length = 16000)
 	private String description;
+	@Column(length = 1000)
 	private String source;
 	private String sourceParent;
 	private float version;

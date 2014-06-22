@@ -16,12 +16,14 @@ public class Application {
 
 	private static Logger LOGGER = LoggerFactory.getLogger(Application.class);
 	
-    public static void main(String[] args) {
-    	LOGGER.info("Urja starting...");
-        SpringApplication.run(Application.class, args);
-    }
-    @Bean
-    public static PropertySourcesPlaceholderConfigurer placeHolderConfigurer() {
-     return new PropertySourcesPlaceholderConfigurer();
-    }
+
+	public static void main(String[] args) {
+		LOGGER.info("Urja starting...");
+		SpringApplication.run(Application.class, args);
+	}
+
+	@Bean
+	public static PropertySourcesPlaceholderConfigurer placeHolderConfigurer() {
+		return new PropertySourcesPlaceholderConfigurer();
+	}
 }
