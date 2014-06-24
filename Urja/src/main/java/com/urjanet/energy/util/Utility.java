@@ -15,6 +15,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.google.common.io.CharStreams;
@@ -35,6 +36,7 @@ public class Utility {
 	private static CloseableHttpClient hclient;
 
 	@Autowired
+//	@Qualifier("getGson")
 	private Gson thisGson;
 	@Autowired
 	private CloseableHttpClient theHclient;

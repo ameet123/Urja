@@ -1,5 +1,7 @@
 package com.urjanet.energy;
 
+import java.util.Map.Entry;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -7,6 +9,8 @@ import org.springframework.context.annotation.Configuration;
 
 import com.urjanet.energy.entity.UtilityCompanies;
 import com.urjanet.energy.entity.UtilityRates;
+import com.urjanet.energy.json.BulkManifest;
+import com.urjanet.energy.json.BulkManifest.Series;
 import com.urjanet.energy.json.UtilityCompaniesJson;
 import com.urjanet.energy.json.UtilityRatesJson;
 import com.urjanet.energy.service.UtilityCompaniesService;
@@ -29,11 +33,26 @@ public class JsonReader {
 
 	@Value("${fetch}")
 	private char fetchMechanism;
-
+	@Bean
+	public int processEiaManifest(){
+		String manifest = "/home/ac2211/Urja/energy/manifest.json";
+		String text = Utility.fetchFromFile(manifest);
+		System.out.println("First few lines:"+text.substring(0, 200));
+		BulkManifest bm = Utility.fromJson(text, BulkManifest.class);
+		System.out.println(bm.getDataset().size());
+		for(Entry<String, Series> e: bm.getDataset().entrySet()){
+			System.out.println("key=>"+e.getKey()+" val=>"+e.getValue().getIdentifier());
+		}
+//		System.out.println(" set:"+bm.getSeriesMap().size());
+//		for(Entry<String, Series> e : bm.getSeriesMap().entrySet()){
+//			System.out.println("key=>"+e.getKey()+" lastUpdated:"+e.getValue().getLastUpdated()+" ID:"+e.getValue().getIdentifier());
+//		}
+		return 1;
+	}
 	/**
 	 * JSON for Utility Rates table
 	 */
-	@Bean
+//	@Bean
 	public int processUtilityRates() {
 		String text = null;
 		if (fetchMechanism == 'f') {
@@ -55,7 +74,7 @@ public class JsonReader {
 		return i;
 	}
 
-	@Bean
+//	@Bean
 	public int processUtilityCompanies() {
 		String text = null;
 		if (fetchMechanism == 'f') {
