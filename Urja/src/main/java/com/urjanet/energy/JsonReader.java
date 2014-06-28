@@ -7,12 +7,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.urjanet.energy.entity.Series;
 import com.urjanet.energy.entity.UtilityCompanies;
 import com.urjanet.energy.entity.UtilityRates;
 import com.urjanet.energy.json.BulkManifest;
-import com.urjanet.energy.json.BulkManifest.Series;
 import com.urjanet.energy.json.UtilityCompaniesJson;
 import com.urjanet.energy.json.UtilityRatesJson;
+import com.urjanet.energy.service.SeriesService;
 import com.urjanet.energy.service.UtilityCompaniesService;
 import com.urjanet.energy.service.UtilityRatesService;
 import com.urjanet.energy.util.ApiConstants;
@@ -30,7 +31,9 @@ public class JsonReader {
 	private UtilityRatesService utilityRateSvc;
 	@Autowired
 	private UtilityCompaniesService utilityCompSvc;
-
+	@Autowired
+	private SeriesService seriesSvs;
+	
 	@Value("${fetch}")
 	private char fetchMechanism;
 	@Bean
@@ -42,11 +45,16 @@ public class JsonReader {
 		System.out.println(bm.getDataset().size());
 		for(Entry<String, Series> e: bm.getDataset().entrySet()){
 			System.out.println("key=>"+e.getKey()+" val=>"+e.getValue().getIdentifier());
+			Series sr = e.getValue();
+			seriesSvs.save(sr);
+			System.out.println("AccessURL:"+sr.getAccessURL());
 		}
-//		System.out.println(" set:"+bm.getSeriesMap().size());
-//		for(Entry<String, Series> e : bm.getSeriesMap().entrySet()){
-//			System.out.println("key=>"+e.getKey()+" lastUpdated:"+e.getValue().getLastUpdated()+" ID:"+e.getValue().getIdentifier());
-//		}
+		return 1;
+	}
+//	@Bean
+	public int processCompressed(){
+		String uri = "http://www.google.com";
+		String chdr = Utility.decompressHttp(uri);
 		return 1;
 	}
 	/**

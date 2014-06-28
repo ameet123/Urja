@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -71,6 +72,28 @@ public class Utility {
 		HttpGet rateGet = new HttpGet(uri);
 		try {
 			CloseableHttpResponse rateResponse = hclient.execute(rateGet);
+			HttpEntity rateEntity = rateResponse.getEntity();
+			try (final Reader reader = new InputStreamReader(
+					rateEntity.getContent())) {
+				text = CharStreams.toString(reader);
+			}
+			LOGGER.debug("First few lines:{}", text.substring(0, 100));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return text;
+	}
+	public static String decompressHttp(String uri) {
+		String text = null;
+		HttpGet rateGet = new HttpGet(uri);
+		try {
+			CloseableHttpResponse rateResponse = hclient.execute(rateGet);
+			for (Header h:rateResponse.getAllHeaders()){
+				System.out.println("headers h:"+h.getName()+" val:"+h.getValue());
+			}
+//			Header encoding = rateResponse.getFirstHeader("Content-Encoding");
+//			System.out.println("header :"+encoding.getName()+" val:"+encoding.getValue());
 			HttpEntity rateEntity = rateResponse.getEntity();
 			try (final Reader reader = new InputStreamReader(
 					rateEntity.getContent())) {
