@@ -25,6 +25,11 @@ public class SedsSeriesData {
 	@JoinColumn(name="series_id", referencedColumnName="series_id")
 	private SedsSeries sedsSeries;
 	
+	public SedsSeriesData(String year, String data) {
+		this.year = year;
+		this.data = data;
+	}
+	
 	public Long getId() {
 		return id;
 	}

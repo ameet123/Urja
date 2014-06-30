@@ -17,6 +17,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -51,10 +52,10 @@ public class SedsSeries {
 	@OneToMany(orphanRemoval=true, mappedBy="sedsSeries", targetEntity=SedsSeriesData.class, 
 			cascade = CascadeType.ALL, fetch=FetchType.EAGER)
 	@OrderBy("year")
-//	@SerializedName("data")
 	private Set<SedsSeriesData> sedData = new LinkedHashSet<>();
 	
-//	private List<List<String>> data = new ArrayList<List<String>>();
+	@Transient
+	private List<List<String>> data = new ArrayList<List<String>>();
 	
 	public Date getLastUpdated() {
 		return lastUpdated;
@@ -143,5 +144,20 @@ public class SedsSeries {
 	}
 	public void setSeriesId(String seriesId) {
 		this.seriesId = seriesId;
+	}
+	public List<List<String>> getData() {
+		return data;
+	}
+	public void setData(List<List<String>> data) {
+		this.data = data;
+	}
+	/**
+	 * based on the series data in nested List form, fill the List<POJO>
+	 * @return
+	 */
+	public void fillSedsData() {
+		for(List<String> data: getData()){
+			getSedData().add(new SedsSeriesData(data.get(0), data.get(1)));
+		}
 	}
 }

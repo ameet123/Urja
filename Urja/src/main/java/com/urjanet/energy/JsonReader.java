@@ -1,10 +1,8 @@
 package com.urjanet.energy;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 
@@ -14,14 +12,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.urjanet.energy.entity.SedsSeries;
-import com.urjanet.energy.entity.SedsSeriesData;
 import com.urjanet.energy.entity.Series;
 import com.urjanet.energy.entity.UtilityCompanies;
 import com.urjanet.energy.entity.UtilityRates;
 import com.urjanet.energy.json.BulkManifest;
-import com.urjanet.energy.json.SedsJson;
 import com.urjanet.energy.json.UtilityCompaniesJson;
 import com.urjanet.energy.json.UtilityRatesJson;
 import com.urjanet.energy.service.SeriesService;
@@ -86,16 +81,11 @@ public class JsonReader {
 		return 1;
 
 	}
-	private int readSeries(String text){
-//		Type dataType = new TypeToken<List<SedsSeriesData>>(){}.getType();
-//		Type mapType = new TypeToken<SedsSeries>(){}.getType();
-		SedsJson ss = Utility.fromJson(text, SedsJson.class);
-//		SedsSeries ss = gson.fromJson(text, mapType);
-		System.out.print(" series:"+ss.getName());
-//		List<SedsSeriesData> ssd = gson.fromJson(text.get, dataType);
-		System.out.println(" Size of data:"+ss.getData().size());
-//		System.out.println(" year:"+ ss.getData().get(2).get(0)+ " data:"+ ss.getData().get(2).get(1));
-		System.out.println(" year:"+ ss.getData().get(7).get(0));
+	private int readSeries(String text){		
+		SedsSeries ss1 = Utility.fromJson(text, SedsSeries.class);
+		ss1.fillSedsData();
+		System.out.println(" series:"+ss1.getName()+" Random data: year="+ss1.getSedData().iterator().next().getYear()+ " data="+ss1.getSedData().iterator().next().getData());
+
 		return 1;
 	}
 
@@ -119,13 +109,6 @@ public class JsonReader {
 			seriesSvs.save(sr);
 			System.out.println("AccessURL:" + sr.getAccessURL());
 		}
-		return 1;
-	}
-
-	// @Bean
-	public int processCompressed() {
-		String uri = "http://www.google.com";
-		String chdr = Utility.decompressHttp(uri);
 		return 1;
 	}
 
