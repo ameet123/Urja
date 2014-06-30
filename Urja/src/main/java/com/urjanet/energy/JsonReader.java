@@ -94,7 +94,8 @@ public class JsonReader {
 		System.out.print(" series:"+ss.getName());
 //		List<SedsSeriesData> ssd = gson.fromJson(text.get, dataType);
 		System.out.println(" Size of data:"+ss.getData().size());
-		System.out.println(" year:"+ ss.getData().get(2).get(0)+ " data:"+ ss.getData().get(2).get(1));
+//		System.out.println(" year:"+ ss.getData().get(2).get(0)+ " data:"+ ss.getData().get(2).get(1));
+		System.out.println(" year:"+ ss.getData().get(7).get(0));
 		return 1;
 	}
 

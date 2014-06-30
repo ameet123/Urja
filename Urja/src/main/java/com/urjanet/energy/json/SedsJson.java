@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.gson.annotations.SerializedName;
-import com.urjanet.energy.entity.SedsSeriesData;
 public class SedsJson {
 
 	@SerializedName("series_id") // this is for JSON, this is what appears in the file
