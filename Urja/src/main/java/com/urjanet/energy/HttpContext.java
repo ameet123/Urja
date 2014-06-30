@@ -4,6 +4,7 @@ import java.lang.reflect.Type;
 import java.util.Date;
 
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -22,7 +23,8 @@ public class HttpContext {
 
 	@Bean
 	public CloseableHttpClient httpClient() {
-		return HttpClients.createDefault();
+//		return HttpClients.createDefault();
+		return HttpClientBuilder.create().build();
 	}
 
 	/**
