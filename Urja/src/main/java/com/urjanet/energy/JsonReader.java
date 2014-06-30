@@ -1,26 +1,27 @@
 package com.urjanet.energy;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.urjanet.energy.entity.SedsSeries;
+import com.urjanet.energy.entity.SedsSeriesData;
 import com.urjanet.energy.entity.Series;
 import com.urjanet.energy.entity.UtilityCompanies;
 import com.urjanet.energy.entity.UtilityRates;
 import com.urjanet.energy.json.BulkManifest;
+import com.urjanet.energy.json.SedsJson;
 import com.urjanet.energy.json.UtilityCompaniesJson;
 import com.urjanet.energy.json.UtilityRatesJson;
 import com.urjanet.energy.service.SeriesService;
@@ -43,6 +44,8 @@ public class JsonReader {
 	private UtilityCompaniesService utilityCompSvc;
 	@Autowired
 	private SeriesService seriesSvs;
+	@Autowired
+	private Gson gson;
 
 	@Value("${fetch}")
 	private char fetchMechanism;
@@ -75,11 +78,24 @@ public class JsonReader {
 //		} catch (Exception e) {
 //			e.printStackTrace();
 //		}
-		try(Stream<String> ls = Files.lines(Paths.get(destination+"SEDS.txt"))){
-			System.out.println(ls.findFirst().get());
+		try(Stream<String> ls = Files.lines(Paths.get(destination+"small.txt"))){
+			System.out.println("in stream");
+			ls.forEach(p->readSeries(p));
+			
 		}
 		return 1;
 
+	}
+	private int readSeries(String text){
+//		Type dataType = new TypeToken<List<SedsSeriesData>>(){}.getType();
+//		Type mapType = new TypeToken<SedsSeries>(){}.getType();
+		SedsJson ss = Utility.fromJson(text, SedsJson.class);
+//		SedsSeries ss = gson.fromJson(text, mapType);
+		System.out.print(" series:"+ss.getName());
+//		List<SedsSeriesData> ssd = gson.fromJson(text.get, dataType);
+		System.out.println(" Size of data:"+ss.getData().size());
+		System.out.println(" year:"+ ss.getData().get(2).get(0)+ " data:"+ ss.getData().get(2).get(1));
+		return 1;
 	}
 
 	// @Bean
