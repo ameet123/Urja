@@ -10,6 +10,8 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -17,7 +19,6 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -45,7 +46,6 @@ public class Utility {
 	private static CloseableHttpClient hclient;
 
 	@Autowired
-//	@Qualifier("getGson")
 	private Gson thisGson;
 	@Autowired
 	private CloseableHttpClient theHclient;
@@ -148,6 +148,27 @@ public class Utility {
 		}
 	}
 
+	public static boolean isCategory(String text){
+		return isFound(text, Constants.CATEGORY_PATTERN);
+	}
+	public static boolean isSeries(String text){
+		return isFound(text, Constants.SERIES_PATTERN);
+	}
+	/**
+	 * generic pattern matcher
+	 * @param text
+	 * @param PATTERN
+	 * @return boolean
+	 */
+	public static boolean isFound(String text, final String PATTERN){
+		Pattern pattern = Pattern.compile(PATTERN);
+		Matcher match = pattern.matcher(text);
+		if (match.find()){		
+			return true;
+		} else {
+			return false;
+		}			
+	}
 	/**
 	 * convert a json string to appropriate object
 	 * 

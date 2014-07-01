@@ -25,5 +25,9 @@ public class Constants {
 
 	public static final String PROPERTY_NAME_MESSAGESOURCE_BASENAME = "message.source.basename";
 	public static final String PROPERTY_NAME_MESSAGESOURCE_USE_CODE_AS_DEFAULT_MESSAGE = "message.source.use.code.as.default.message";
+	
+	// file constants
+	public static final String SERIES_PATTERN = "^\\{\"series_id";
+	public static final String CATEGORY_PATTERN = "^\\{\"category_id";
 
 }

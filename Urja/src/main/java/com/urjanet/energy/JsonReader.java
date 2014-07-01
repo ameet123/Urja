@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.gson.Gson;
+import com.urjanet.energy.entity.Category;
 import com.urjanet.energy.entity.SedsSeries;
 import com.urjanet.energy.entity.Series;
 import com.urjanet.energy.entity.UtilityCompanies;
@@ -21,6 +22,7 @@ import com.urjanet.energy.entity.UtilityRates;
 import com.urjanet.energy.json.BulkManifest;
 import com.urjanet.energy.json.UtilityCompaniesJson;
 import com.urjanet.energy.json.UtilityRatesJson;
+import com.urjanet.energy.service.CategoryService;
 import com.urjanet.energy.service.SedsSeriesService;
 import com.urjanet.energy.service.SeriesService;
 import com.urjanet.energy.service.UtilityCompaniesService;
@@ -46,6 +48,8 @@ public class JsonReader {
 	private SeriesService seriesSvs;
 	@Autowired
 	private SedsSeriesService sedsSeriesSvc;
+	@Autowired
+	private CategoryService categorySvc;
 	
 	@Autowired
 	private Gson gson;
@@ -65,20 +69,23 @@ public class JsonReader {
 		return 1;
 
 	}
-	private int persistSedsSeries(String text){		
-		SedsSeries ss1 = Utility.fromJson(text, SedsSeries.class);
-		ss1.fillSedsData();
-		System.out.println(
-				" series:"+ss1.getName()+
-				" Random data: year="+ss1.getSedData().iterator().next().getYear()+
-				" data="+ss1.getSedData().iterator().next().getData());
-		sedsSeriesSvc.save(ss1);
-		return 1;
-	}
-
-	// @Bean
-	public int getSeds() {
-		Utility.downloadHttpFile("http://api.eia.gov/bulk/SEDS.zip", "/home/ac2211/Urja/energy/bulk/");
+	private int persistSedsSeries(String text){	
+		// find out series or category		
+		if (Utility.isSeries(text)) {		
+			SedsSeries ss1 = Utility.fromJson(text, SedsSeries.class);
+			ss1.fillSedsData();
+			LOGGER.debug(
+					" series:"+ss1.getName()+
+					" Random data: year="+ss1.getSedData().iterator().next().getYear()+
+					" data="+ss1.getSedData().iterator().next().getData());
+			sedsSeriesSvc.save(ss1);
+			System.out.println("done series:");
+		} else if (Utility.isCategory(text)){
+			System.out.println("Doing category:");
+			Category cat = Utility.fromJson(text, Category.class);
+			LOGGER.debug(" Category:"+cat.getName());
+			categorySvc.save(cat);
+		}
 		return 1;
 	}
 
