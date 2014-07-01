@@ -22,7 +22,7 @@ public class SedsSeriesData {
 	private String year;
 	private String data;
 	@ManyToOne(fetch=FetchType.EAGER, cascade=CascadeType.PERSIST)
-	@JoinColumn(name="series_id", referencedColumnName="series_id")
+	@JoinColumn(name="seds_series_id", referencedColumnName="id")
 	private SedsSeries sedsSeries;
 	
 	public SedsSeriesData(String year, String data) {

@@ -6,6 +6,8 @@ import java.nio.file.Paths;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +21,7 @@ import com.urjanet.energy.entity.UtilityRates;
 import com.urjanet.energy.json.BulkManifest;
 import com.urjanet.energy.json.UtilityCompaniesJson;
 import com.urjanet.energy.json.UtilityRatesJson;
+import com.urjanet.energy.service.SedsSeriesService;
 import com.urjanet.energy.service.SeriesService;
 import com.urjanet.energy.service.UtilityCompaniesService;
 import com.urjanet.energy.service.UtilityRatesService;
@@ -33,12 +36,17 @@ import com.urjanet.energy.util.Utility;
  */
 @Configuration
 public class JsonReader {
+	private static Logger LOGGER = LoggerFactory.getLogger(JsonReader.class);
+	
 	@Autowired
 	private UtilityRatesService utilityRateSvc;
 	@Autowired
 	private UtilityCompaniesService utilityCompSvc;
 	@Autowired
 	private SeriesService seriesSvs;
+	@Autowired
+	private SedsSeriesService sedsSeriesSvc;
+	
 	@Autowired
 	private Gson gson;
 
@@ -49,49 +57,28 @@ public class JsonReader {
 	public int uncomp() throws IOException {
 		String source = "/home/ac2211/Urja/energy/bulk/SEDS.zip";
 		String destination = "/home/ac2211/Urja/energy/bulk/";
-//		final int BUFFER = 2048;
-//
-//		try {
-//			BufferedOutputStream dest = null;
-//			FileInputStream fis = new FileInputStream(source);
-//			ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis));
-//			ZipEntry entry;
-//			while ((entry = zis.getNextEntry()) != null) {
-//				System.out.println("Extracting: " + entry.getName());
-//				int count;
-//				byte data[] = new byte[BUFFER];
-//				// write the files to the disk
-//				FileOutputStream fos = new FileOutputStream(destination+entry.getName());
-//				dest = new BufferedOutputStream(fos, BUFFER);
-//				while ((count = zis.read(data, 0, BUFFER)) != -1) {
-//					dest.write(data, 0, count);
-//				}
-//				dest.flush();
-//				dest.close();
-//			}
-//			zis.close();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
+		Utility.unzipFile(source, destination);
+		
 		try(Stream<String> ls = Files.lines(Paths.get(destination+"small.txt"))){
-			System.out.println("in stream");
-			ls.forEach(p->readSeries(p));
-			
+			ls.forEach(p->persistSedsSeries(p));			
 		}
 		return 1;
 
 	}
-	private int readSeries(String text){		
+	private int persistSedsSeries(String text){		
 		SedsSeries ss1 = Utility.fromJson(text, SedsSeries.class);
 		ss1.fillSedsData();
-		System.out.println(" series:"+ss1.getName()+" Random data: year="+ss1.getSedData().iterator().next().getYear()+ " data="+ss1.getSedData().iterator().next().getData());
-
+		System.out.println(
+				" series:"+ss1.getName()+
+				" Random data: year="+ss1.getSedData().iterator().next().getYear()+
+				" data="+ss1.getSedData().iterator().next().getData());
+		sedsSeriesSvc.save(ss1);
 		return 1;
 	}
 
 	// @Bean
 	public int getSeds() {
-		Utility.decompressHttp("http://api.eia.gov/bulk/SEDS.zip");
+		Utility.downloadHttpFile("http://api.eia.gov/bulk/SEDS.zip", "/home/ac2211/Urja/energy/bulk/");
 		return 1;
 	}
 

@@ -156,8 +156,11 @@ public class SedsSeries {
 	 * @return
 	 */
 	public void fillSedsData() {
+		SedsSeriesData ssData;
 		for(List<String> data: getData()){
-			getSedData().add(new SedsSeriesData(data.get(0), data.get(1)));
+			ssData = new SedsSeriesData(data.get(0), data.get(1));
+			ssData.setSedsSeries(this);
+			getSedData().add(ssData);
 		}
 	}
 }
