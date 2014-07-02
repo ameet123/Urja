@@ -65,7 +65,6 @@ public class Utility {
 	 */
 	public static void unzipFile(String source, String destination){
 		final int BUFFER = 2048;
-		//
 		try {
 			BufferedOutputStream dest = null;
 			FileInputStream fis = new FileInputStream(source);

@@ -5,7 +5,6 @@ import java.util.Date;
 
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.context.annotation.Bean;
@@ -26,16 +25,6 @@ public class HttpContext {
 //		return HttpClients.createDefault();
 		return HttpClientBuilder.create().build();
 	}
-
-	/**
-	 * instantiate Gson object
-	 * 
-	 * @return
-	 */
-//	@Bean
-//	public Gson getGson() {
-//		return new Gson();
-//	}
 
 	@Bean
 	public Gson customDateGson() {

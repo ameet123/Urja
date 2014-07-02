@@ -29,5 +29,7 @@ public class Constants {
 	// file constants
 	public static final String SERIES_PATTERN = "^\\{\"series_id";
 	public static final String CATEGORY_PATTERN = "^\\{\"category_id";
-
+	
+	public static final String BULK_DATA = "/home/ac2211/Urja/energy/bulk/";
+	public static final String AEO_FILE = "AEO.txt";
 }
