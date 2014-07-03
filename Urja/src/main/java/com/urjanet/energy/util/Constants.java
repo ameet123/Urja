@@ -31,5 +31,13 @@ public class Constants {
 	public static final String CATEGORY_PATTERN = "^\\{\"category_id";
 	
 	public static final String BULK_DATA = "/home/ac2211/Urja/energy/bulk/";
-	public static final String AEO_FILE = "AEO.txt";
+	public static final String AEO_FILE = "AEO.small";
+	public static final String SEDS_FILE = "SEDS.txt";
+	
+	public static final String COAL_HTTP = "http://api.eia.gov/bulk/COAL.zip";
+	public static final String AEO_HTTP = "http://api.eia.gov/bulk/AEO.zip";
+	public static final String PET_HTTP = "http://api.eia.gov/bulk/PET.zip";
+	public static final String NG_HTTP = "http://api.eia.gov/bulk/NG.zip";
+	public static final String SEDS_HTTP = "http://api.eia.gov/bulk/SEDS.zip";
+	
 }

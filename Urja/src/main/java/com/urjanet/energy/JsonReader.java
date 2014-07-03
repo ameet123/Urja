@@ -3,6 +3,7 @@ package com.urjanet.energy;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.google.common.base.Splitter;
 import com.google.gson.Gson;
 import com.urjanet.energy.entity.AeoCategory;
 import com.urjanet.energy.entity.AeoSeries;
@@ -68,31 +70,26 @@ public class JsonReader {
 
 //	@Bean
 	public int downloadBulk(){
-		String coal =  "http://api.eia.gov/bulk/COAL.zip";
-		String aeo = "http://api.eia.gov/bulk/AEO.zip";
-		String pet = "http://api.eia.gov/bulk/PET.zip";
-		String ng = "http://api.eia.gov/bulk/NG.zip";
-		String destination = "/home/ac2211/Urja/energy/bulk/";
-		
-//		Utility.downloadHttpFile(coal, destination);
-//		Utility.unzipFile(destination+"COAL.zip", destination);
-//		Utility.downloadHttpFile(aeo, destination);
-//		Utility.unzipFile(destination+"AEO.zip", destination);
-//		Utility.downloadHttpFile(pet, destination);
-//		Utility.unzipFile(destination+"PET.zip", destination);
-		Utility.downloadHttpFile(ng, destination);
-		Utility.unzipFile(destination+"NG.zip", destination);
+		Utility.downloadHttpFile(Constants.COAL_HTTP, Constants.BULK_DATA);
+		Utility.unzipFile(Constants.BULK_DATA+"COAL.zip", Constants.BULK_DATA);
+		Utility.downloadHttpFile(Constants.AEO_HTTP, Constants.BULK_DATA);
+		Utility.unzipFile(Constants.BULK_DATA+"AEO.zip", Constants.BULK_DATA);
+		Utility.downloadHttpFile(Constants.PET_HTTP, Constants.BULK_DATA);
+		Utility.unzipFile(Constants.BULK_DATA+"PET.zip", Constants.BULK_DATA);
+		Utility.downloadHttpFile(Constants.NG_HTTP, Constants.BULK_DATA);
+		Utility.unzipFile(Constants.BULK_DATA+"NG.zip", Constants.BULK_DATA);
+		Utility.downloadHttpFile(Constants.SEDS_HTTP, Constants.BULK_DATA);
+		Utility.unzipFile(Constants.BULK_DATA+"SEDS.zip", Constants.BULK_DATA);
 		return 1;
 	}
 //	@Bean
-	public int uncomp() throws IOException {
-		String source = "/home/ac2211/Urja/energy/bulk/SEDS.zip";
-		String destination = "/home/ac2211/Urja/energy/bulk/";
-//		Utility.unzipFile(source, destination);
-		try(Stream<String> ls = Files.lines(Paths.get(destination+"SEDS.txt"))){
-			ls.forEach(p->persistSedsSeries(p));			
+	public int processSeds() throws IOException {
+		int count = 0;
+		try(Stream<String> ls = Files.lines(Paths.get(Constants.BULK_DATA+Constants.SEDS_FILE))){
+			count = ls.map(p->persistSedsSeries(p)).reduce(Integer::sum).get();			
 		}
-		return 1;
+		System.out.println("SEDS Processed:"+count);
+		return count;
 	}
 	@Bean
 	public int processAeo(){
@@ -100,7 +97,6 @@ public class JsonReader {
 		try(Stream<String> ls = Files.lines(Paths.get(Constants.BULK_DATA+Constants.AEO_FILE))){
 			count = ls.map(p->persistAeoSeries(p)).reduce(Integer::sum).get();			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		System.out.println("AEO Processed:"+count);
@@ -128,6 +124,7 @@ public class JsonReader {
 		if (Utility.isSeries(text)) {		
 			AeoSeries ss = Utility.fromJson(text, AeoSeries.class);
 			ss.fillChildData();
+			fillLevels(ss);
 			LOGGER.debug(
 					" series:"+ss.getName()+
 					" Random data: year="+ss.getChildData().iterator().next().getYear()+
@@ -139,6 +136,37 @@ public class JsonReader {
 			aeoCategorySvc.save(cat);
 		}
 		return 1;
+	}
+	/**
+	 * construct multiple levels/categories out of name
+	 * @param as
+	 */
+	private void fillLevels(AeoSeries as){
+		// make levels out of name
+		Iterator<String> it = Splitter.on(':').split(as.getName()).iterator();
+		int i = 0;
+		while (it.hasNext()){
+			i++;
+			switch (i) {
+			case 1:
+				as.setLevel1(it.next());
+				break;
+			case 2:
+				as.setLevel2(it.next());
+				break;
+			case 3:
+				as.setLevel3(it.next());
+				break;
+			case 4: 
+				as.setLevel4(it.next());
+				break;
+			case 5:
+				as.setLevel5(it.next());
+				break;
+			default:
+				break;
+			}
+		}		
 	}
 
 	// @Bean
