@@ -2,6 +2,7 @@ package com.urjanet.energy.entity;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,6 +23,7 @@ import javax.persistence.Transient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Splitter;
 import com.google.gson.annotations.SerializedName;
 
 @Entity
@@ -188,5 +190,35 @@ public class AeoSeries {
 	}
 	public void setLevel5(String level5) {
 		this.level5 = level5;
+	}
+	/**
+	 * split name into 5 levels.
+	 */
+	public void fillLevels() {
+		// make levels out of name
+		Iterator<String> it = Splitter.on(':').split(getName()).iterator();
+		int i = 0;
+		while (it.hasNext()) {
+			i++;
+			switch (i) {
+			case 1:
+				setLevel1(it.next());
+				break;
+			case 2:
+				setLevel2(it.next());
+				break;
+			case 3:
+				setLevel3(it.next());
+				break;
+			case 4:
+				setLevel4(it.next());
+				break;
+			case 5:
+				setLevel5(it.next());
+				break;
+			default:
+				break;
+			}
+		}
 	}
 }

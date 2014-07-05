@@ -1,5 +1,7 @@
 package com.urjanet.energy.util;
 
+import org.apache.commons.io.FilenameUtils;
+
 public class Constants {
 
 	// Data pool related parameters
@@ -34,10 +36,13 @@ public class Constants {
 	public static final String AEO_FILE = "AEO.small";
 	public static final String SEDS_FILE = "SEDS.txt";
 	
+	public static final String MANIFEST_HTTP = "http://api.eia.gov/bulk/manifest.txt";
+	
 	public static final String COAL_HTTP = "http://api.eia.gov/bulk/COAL.zip";
 	public static final String AEO_HTTP = "http://api.eia.gov/bulk/AEO.zip";
 	public static final String PET_HTTP = "http://api.eia.gov/bulk/PET.zip";
 	public static final String NG_HTTP = "http://api.eia.gov/bulk/NG.zip";
 	public static final String SEDS_HTTP = "http://api.eia.gov/bulk/SEDS.zip";
 	
+	public static final String SEDS_ZIP = FilenameUtils.getName(SEDS_HTTP);
 }
