@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -65,59 +66,53 @@ public class JsonReader {
 
 	@Value("${fetch}")
 	private char fetchMechanism;
-	@Value("${seds}")
-	private char seds;
-	@Value("${downloadSeds}")
+	 @Value("${downloadSeds:n}")
 	private char downloadSeds;
-	@Value("${aeo}")
-	private char aeo;
-	@Value("${downloadAeo}")
+	 @Value("${downloadAeo:n}")
 	private char downloadAeo;
 
 	@Bean
+	@ConditionalOnProperty("seds")
 	public int processSeds() throws IOException {
 		int count = 0;
-		if (seds == 'y') {
-			System.out.println("Processing seds bean...");
-			if (downloadSeds == 'y') {
-				Utility.downloadHttpFile(Constants.SEDS_HTTP,
-						Constants.BULK_DATA);
-				Utility.unzipFile(Constants.BULK_DATA + Constants.SEDS_ZIP,
-						Constants.BULK_DATA);
-				LOGGER.debug("completed seds download");
-			}
 
-			try (Stream<String> ls = Files.lines(Paths.get(Constants.BULK_DATA
-					+ Constants.SEDS_FILE))) {
-				count = ls.map(p -> persistSedsSeries(p)).reduce(Integer::sum)
-						.get();
-			}
-			System.out.println("SEDS Processed:" + count);
+		System.out.println("Processing seds bean...");
+		if (downloadSeds == 'y') {
+			Utility.downloadHttpFile(Constants.SEDS_HTTP, Constants.BULK_DATA);
+			Utility.unzipFile(Constants.BULK_DATA + Constants.SEDS_ZIP,
+					Constants.BULK_DATA);
+			LOGGER.debug("completed seds download");
 		}
+
+		try (Stream<String> ls = Files.lines(Paths.get(Constants.BULK_DATA
+				+ Constants.SEDS_FILE))) {
+			count = ls.map(p -> persistSedsSeries(p)).reduce(Integer::sum)
+					.get();
+		}
+		System.out.println("SEDS Processed:" + count);
+
 		return count;
 	}
 
 	@Bean
+	@ConditionalOnProperty("aeo")
 	public int processAeo() {
 		int count = 0;
-		if (aeo == 'y') {
-			System.out.println("Processing AEO ...");
-			if (downloadAeo == 'y') {
-				Utility.downloadHttpFile(Constants.AEO_HTTP,
-						Constants.BULK_DATA);
-				Utility.unzipFile(Constants.BULK_DATA + "AEO.zip",
-						Constants.BULK_DATA);
-				LOGGER.debug("completed aeo download");
-			}
-			try (Stream<String> ls = Files.lines(Paths.get(Constants.BULK_DATA
-					+ Constants.AEO_FILE))) {
-				count = ls.map(p -> persistAeoSeries(p)).reduce(Integer::sum)
-						.get();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			System.out.println("AEO Processed:" + count);
+
+		System.out.println("Processing AEO ...");
+		if (downloadAeo == 'y') {
+			Utility.downloadHttpFile(Constants.AEO_HTTP, Constants.BULK_DATA);
+			Utility.unzipFile(Constants.BULK_DATA + "AEO.zip",
+					Constants.BULK_DATA);
+			LOGGER.debug("completed aeo download");
 		}
+		try (Stream<String> ls = Files.lines(Paths.get(Constants.BULK_DATA
+				+ Constants.AEO_FILE))) {
+			count = ls.map(p -> persistAeoSeries(p)).reduce(Integer::sum).get();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		System.out.println("AEO Processed:" + count);
 		return count;
 	}
 
@@ -164,6 +159,7 @@ public class JsonReader {
 	 * @return
 	 */
 	@Bean
+	@ConditionalOnProperty("manifest")
 	public int processEiaManifest() {
 		String text;
 		int i = 0;
@@ -191,7 +187,10 @@ public class JsonReader {
 	 * Utility.fetchFromFile(ApiConstants.UTIL_RATE_JSON_FILE); }
 	 */
 	@Bean
+	@ConditionalOnProperty("utilRates")
 	public int processUtilityRates() {
+		System.out.println("Processing util rates...");
+
 		String text = null;
 		int i = 0;
 		if (fetchMechanism == 'h') {
@@ -218,6 +217,7 @@ public class JsonReader {
 	 * @return number of records processed
 	 */
 	@Bean
+	@ConditionalOnProperty("utilCompanies")
 	public int processUtilityCompanies() {
 		String text = null;
 		int i = 0;

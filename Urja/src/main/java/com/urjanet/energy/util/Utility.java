@@ -111,6 +111,8 @@ public class Utility {
 	 * @return String
 	 */
 	public static String fetchHttp(String uri) {
+		System.out.println("Running fetch on:"+uri);
+		
 		String text = null;
 		HttpGet rateGet = new HttpGet(uri);
 		try {
