@@ -45,4 +45,5 @@ public class Constants {
 	public static final String SEDS_HTTP = "http://api.eia.gov/bulk/SEDS.zip";
 	
 	public static final String SEDS_ZIP = FilenameUtils.getName(SEDS_HTTP);
+	public static final String AEO_ZIP = FilenameUtils.getName(AEO_HTTP);
 }

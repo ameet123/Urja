@@ -66,10 +66,10 @@ public class JsonReader {
 
 	@Value("${fetch}")
 	private char fetchMechanism;
-	 @Value("${downloadSeds:n}")
-	private char downloadSeds;
-	 @Value("${downloadAeo:n}")
-	private char downloadAeo;
+	@Value("${seds:n}")
+	private char seds;
+	@Value("${aeo:n}")
+	private char aeo;
 
 	@Bean
 	@ConditionalOnProperty("seds")
@@ -77,7 +77,7 @@ public class JsonReader {
 		int count = 0;
 
 		System.out.println("Processing seds bean...");
-		if (downloadSeds == 'y') {
+		if (seds == 'h') {
 			Utility.downloadHttpFile(Constants.SEDS_HTTP, Constants.BULK_DATA);
 			Utility.unzipFile(Constants.BULK_DATA + Constants.SEDS_ZIP,
 					Constants.BULK_DATA);
@@ -100,9 +100,9 @@ public class JsonReader {
 		int count = 0;
 
 		System.out.println("Processing AEO ...");
-		if (downloadAeo == 'y') {
+		if (aeo == 'h') {
 			Utility.downloadHttpFile(Constants.AEO_HTTP, Constants.BULK_DATA);
-			Utility.unzipFile(Constants.BULK_DATA + "AEO.zip",
+			Utility.unzipFile(Constants.BULK_DATA + Constants.AEO_ZIP,
 					Constants.BULK_DATA);
 			LOGGER.debug("completed aeo download");
 		}
