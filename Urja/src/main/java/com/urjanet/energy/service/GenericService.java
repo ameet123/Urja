@@ -47,6 +47,8 @@ public interface GenericService<T> {
      * @return List<T>
      */
     public T findByName(String name);
+    
+    public T findBySeriesId(String seriesId);
 
     /**
      * get total count of records in entity table

@@ -32,7 +32,7 @@ import com.urjanet.energy.repository.GenericRepository;
 public abstract class GenericImpl<T, J extends JpaRepository<T, Long> & GenericRepository<T>>
 		implements GenericService<T> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(GenericImpl.class);
+	private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
 	private Class<T> type;
 	private J genericRepository;
@@ -96,6 +96,11 @@ public abstract class GenericImpl<T, J extends JpaRepository<T, Long> & GenericR
 		return genericRepository.findByName(name);
 	}
 
+	@Override
+	public T findBySeriesId(String seriesId) {
+		return genericRepository.findBySeriesId(seriesId);
+	}
+	
 	@Transactional(readOnly = true)
 	@Override
 	public T findById(Long id) {

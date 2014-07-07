@@ -15,4 +15,5 @@ package com.urjanet.energy.repository;
  */
 public interface GenericRepository<T>{
 	T findByName(String name);
+	T findBySeriesId(String seriesId);
 }
