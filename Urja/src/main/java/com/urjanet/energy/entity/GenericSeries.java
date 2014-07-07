@@ -3,31 +3,21 @@ package com.urjanet.energy.entity;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 import javax.persistence.Transient;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Splitter;
 import com.google.gson.annotations.SerializedName;
 
 @MappedSuperclass
 public abstract class GenericSeries {
-
-	private Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
 	@Id
 	@GeneratedValue(generator = "idSeqGen", strategy = GenerationType.AUTO)
@@ -58,12 +48,6 @@ public abstract class GenericSeries {
 	private String lastHistoricalPeriod;
 	@SerializedName("last_updated")
 	private Date lastUpdated;
-
-	@OneToMany(	orphanRemoval = true, mappedBy = "pkSeries", 
-				targetEntity = GenericSeriesData.class, 
-				cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@OrderBy("period")
-	private Set<GenericSeriesData> childData = new LinkedHashSet<>();
 
 	@Transient
 	private List<List<String>> data = new ArrayList<List<String>>();
@@ -196,27 +180,7 @@ public abstract class GenericSeries {
 		this.level5 = level5;
 	}
 
-	/**
-	 * based on the series data in nested List form, fill the List<POJO>
-	 * 
-	 * @return
-	 */
-	public void fillChildData() {
-		GenericSeriesData childData;
-		for (List<String> data : getData()) {
-			LOGGER.debug("0:" + data.get(0) + " 1:" + data.get(1));
-			try {
-				childData = new GenericSeriesData(data.get(0),
-						Float.parseFloat(data.get(1)));
-			} catch (NumberFormatException nfe) {
-				// some times the record may have "- -"
-				childData = new GenericSeriesData(data.get(0), 0.0f);
-			}
-			childData.setGenericSeries(this);
-			getChildData().add(childData);
-		}
-	}
-
+	
 	/**
 	 * split name into 5 levels.
 	 */
@@ -248,11 +212,9 @@ public abstract class GenericSeries {
 		}
 	}
 
-	public Set<GenericSeriesData> getChildData() {
-		return childData;
-	}
-
-	public void setChildData(Set<GenericSeriesData> childData) {
-		this.childData = childData;
-	}
+	// These are abstract, so we can get the sub classes deal with parameters
+	// but at the same time allow generic procedures to reference these methods
+	public abstract void fillChildData();
+	public abstract Set<? extends GenericSeriesData> getChildData();
+	public abstract void setChildData(Set<? extends GenericSeriesData> childData);
 }

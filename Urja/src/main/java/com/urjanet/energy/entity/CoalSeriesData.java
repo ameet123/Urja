@@ -1,6 +1,10 @@
 package com.urjanet.energy.entity;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -13,15 +17,15 @@ public class CoalSeriesData extends GenericSeriesData {
 		super(period, data);
 	}
 	
-//	@ManyToOne(fetch=FetchType.EAGER, cascade=CascadeType.PERSIST)
-//	@JoinColumn(name="coal_series_id", referencedColumnName="id")
-//	private CoalSeries coalSeries;
-//
-//	public CoalSeries getCoalSeries() {
-//		return coalSeries;
-//	}
-//
-//	public void setCoalSeries(CoalSeries coalSeries) {
-//		this.coalSeries = coalSeries;
-//	}
+	@ManyToOne(fetch=FetchType.EAGER, cascade=CascadeType.PERSIST)
+	@JoinColumn(name="coal_series_id", referencedColumnName="id")
+	private CoalSeries coalSeries;
+
+	public CoalSeries getCoalSeries() {
+		return coalSeries;
+	}
+
+	public void setCoalSeries(CoalSeries coalSeries) {
+		this.coalSeries = coalSeries;
+	}
 }

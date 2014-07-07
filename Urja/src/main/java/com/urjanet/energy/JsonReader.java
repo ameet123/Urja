@@ -3,6 +3,7 @@ package com.urjanet.energy;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 
@@ -18,6 +19,8 @@ import com.google.gson.Gson;
 import com.urjanet.energy.entity.AeoCategory;
 import com.urjanet.energy.entity.AeoSeries;
 import com.urjanet.energy.entity.Category;
+import com.urjanet.energy.entity.CoalSeries;
+import com.urjanet.energy.entity.GenericSeries;
 import com.urjanet.energy.entity.SedsSeries;
 import com.urjanet.energy.entity.Series;
 import com.urjanet.energy.entity.UtilityCompanies;
@@ -28,6 +31,8 @@ import com.urjanet.energy.json.UtilityRatesJson;
 import com.urjanet.energy.service.AeoCategoryService;
 import com.urjanet.energy.service.AeoSeriesService;
 import com.urjanet.energy.service.CategoryService;
+import com.urjanet.energy.service.CoalService;
+import com.urjanet.energy.service.GenericService;
 import com.urjanet.energy.service.SedsSeriesService;
 import com.urjanet.energy.service.SeriesService;
 import com.urjanet.energy.service.UtilityCompaniesService;
@@ -60,6 +65,8 @@ public class JsonReader {
 	private AeoSeriesService aeoSeriesSvc;
 	@Autowired
 	private AeoCategoryService aeoCategorySvc;
+	@Autowired
+	private CoalService coalSeriesSvc;
 
 	@Autowired
 	private Gson gson;
@@ -132,7 +139,46 @@ public class JsonReader {
 		}
 		return 1;
 	}
+	@Bean
+	public int testCoal(){
+		Iterator<String> it;
+		int i=0;
+		try {
+			it = Files.lines(Paths.get("/home/ac2211/Urja/energy/bulk/COAL.small")).iterator();
+			while (it.hasNext()){
+				String text = it.next();
+				CoalSeries cs = Utility.fromJson(text, CoalSeries.class);
+				System.out.println(" JSON:"+cs.getSeriesId());
+				persistGenericSeries(text, cs, CoalSeries.class, coalSeriesSvc);
+				i++;
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return i;
+		
+	}
 
+	private <T extends GenericSeries> int persistGenericSeries(String text, T clzz, Class<? extends GenericSeries> T, GenericService<T> gsvc) {
+		// find out series or category
+		if (Utility.isSeries(text)) {
+			@SuppressWarnings("unchecked")
+			T ss = (T) Utility.fromJson(text, T);
+			ss.fillChildData();
+			ss.fillLevels();
+			LOGGER.debug(" series:" + ss.getName() + " Random data: year="
+					+ ss.getChildData().iterator().next().getPeriod() + " data="
+					+ ss.getChildData().iterator().next().getData());
+			gsvc.save(ss);
+		} else if (Utility.isCategory(text)) {
+//			AeoCategory cat = Utility.fromJson(text, AeoCategory.class);
+//			LOGGER.debug(" AEO Category:" + cat.getName());
+//			aeoCategorySvc.save(cat);
+		}
+		return 1;
+	}
+	
 	private int persistAeoSeries(String text) {
 		// find out series or category
 		if (Utility.isSeries(text)) {
