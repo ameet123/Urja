@@ -34,7 +34,7 @@ public class Constants {
 	
 	public static final String BULK_DATA = "/home/ac2211/Urja/energy/bulk/";
 	public static final String AEO_FILE = "AEO.small";
-	public static final String SEDS_FILE = "SEDS.txt";
+	public static final String SEDS_FILE = "SEDS.small";
 	public static final String NG_FILE = "NG.small";
 	public static final String PET_FILE = "PET.small";
 	public static final String COAL_FILE = "COAL.small";

@@ -26,6 +26,8 @@ import com.urjanet.energy.entity.NgCategory;
 import com.urjanet.energy.entity.NgSeries;
 import com.urjanet.energy.entity.PetCategory;
 import com.urjanet.energy.entity.PetSeries;
+import com.urjanet.energy.entity.SedCategory;
+import com.urjanet.energy.entity.SedSeries;
 import com.urjanet.energy.entity.SedsSeries;
 import com.urjanet.energy.entity.Series;
 import com.urjanet.energy.entity.UtilityCompanies;
@@ -44,6 +46,8 @@ import com.urjanet.energy.service.NgCategoryService;
 import com.urjanet.energy.service.NgService;
 import com.urjanet.energy.service.PetCategoryService;
 import com.urjanet.energy.service.PetService;
+import com.urjanet.energy.service.SedCategoryService;
+import com.urjanet.energy.service.SedService;
 import com.urjanet.energy.service.SedsSeriesService;
 import com.urjanet.energy.service.SeriesService;
 import com.urjanet.energy.service.UtilityCompaniesService;
@@ -88,6 +92,10 @@ public class JsonReader {
 	private PetService petSeriesSvc;
 	@Autowired
 	private PetCategoryService petCategorySvc;
+	@Autowired
+	private SedService sedSeriesSvc;
+	@Autowired
+	private SedCategoryService sedCategorySvc;
 
 	@Autowired
 	private Gson gson;
@@ -162,35 +170,34 @@ public class JsonReader {
 	}
 
 	@Bean
+	public int processSEDS(){
+		return processSeriesAndCategory(Constants.BULK_DATA+Constants.SEDS_FILE, SedSeries.class, sedSeriesSvc, SedCategory.class, sedCategorySvc);
+	}
+	@Bean
 	public int processNG(){
-		return processSubject(Constants.BULK_DATA+Constants.NG_FILE, NgSeries.class, ngSeriesSvc, NgCategory.class, ngCategorySvc);
+		return processSeriesAndCategory(Constants.BULK_DATA+Constants.NG_FILE, NgSeries.class, ngSeriesSvc, NgCategory.class, ngCategorySvc);
 	}
 	@Bean
 	public int processPET(){
-		return processSubject(Constants.BULK_DATA+Constants.PET_FILE, PetSeries.class, petSeriesSvc, PetCategory.class, petCategorySvc);
+		return processSeriesAndCategory(Constants.BULK_DATA+Constants.PET_FILE, PetSeries.class, petSeriesSvc, PetCategory.class, petCategorySvc);
 	}
 	@Bean
 	public int processCOAL(){
-		return processSubject(Constants.BULK_DATA+Constants.COAL_FILE, CoalSeries.class, coalSeriesSvc, CoalCategory.class, coalCategorySvc);
+		return processSeriesAndCategory(Constants.BULK_DATA+Constants.COAL_FILE, CoalSeries.class, coalSeriesSvc, CoalCategory.class, coalCategorySvc);
 	}
 
-	public <T extends GenericSeries, J> int processSubject(String file,
+	public <T extends GenericSeries, J> int processSeriesAndCategory(String file,
 			Class<? extends GenericSeries> T, GenericService<T> gsvc,
 			Class<?> J, GenericCategoryService<J> gCatSvc) {
-		Iterator<String> it;
 		int i = 0;
-		String text;
-		try {
-			it = Files.lines(Paths.get(file)).iterator();
-			while (it.hasNext()) {
-				text = it.next();
-				persistGenericSeries(text, T, gsvc, J, gCatSvc);
-				i++;
-			}
+
+		try(Stream<String> ls = Files.lines(Paths.get(file))){
+			i = ls.map(p -> persistGenericSeries(p, T, gsvc, J, gCatSvc)).reduce(Integer::sum).get();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		System.out.println(T.getSimpleName()+" Processed:"+i);
 		return i;
 	}
 
