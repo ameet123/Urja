@@ -18,8 +18,6 @@ import org.springframework.context.annotation.Configuration;
 import com.google.gson.Gson;
 import com.urjanet.energy.entity.AEOCategory;
 import com.urjanet.energy.entity.AEOSeries;
-import com.urjanet.energy.entity.AeoCategory;
-import com.urjanet.energy.entity.AeoSeries;
 import com.urjanet.energy.entity.CoalCategory;
 import com.urjanet.energy.entity.CoalSeries;
 import com.urjanet.energy.entity.GenericSeries;
@@ -70,14 +68,6 @@ public class JsonReader {
 	private UtilityCompaniesService utilityCompSvc;
 	@Autowired
 	private SeriesService seriesSvs;
-//	@Autowired
-//	private SedsSeriesService sedsSeriesSvc;
-//	@Autowired
-//	private CategoryService categorySvc;
-//	@Autowired
-//	private AeoSeriesService aeoSeriesSvc;
-//	@Autowired
-//	private AeoCategoryService aeoCategorySvc;
 	@Autowired
 	private CoalService coalSeriesSvc;
 	@Autowired
@@ -115,67 +105,7 @@ public class JsonReader {
 	@Value("${coal:n}")
 	private char coal;
 
-//	@Bean
-//	@ConditionalOnProperty("seds")
-//	public int processSeds() throws IOException {
-//		int count = 0;
-//
-//		System.out.println("Processing seds bean...");
-//		if (seds == 'h') {
-//			Utility.downloadHttpFile(Constants.SEDS_HTTP, Constants.BULK_DATA);
-//			Utility.unzipFile(Constants.BULK_DATA + Constants.SEDS_ZIP,
-//					Constants.BULK_DATA);
-//			LOGGER.debug("completed seds download");
-//		}
-//
-//		try (Stream<String> ls = Files.lines(Paths.get(Constants.BULK_DATA
-//				+ Constants.SEDS_FILE))) {
-//			count = ls.map(p -> persistSedsSeries(p)).reduce(Integer::sum)
-//					.get();
-//		}
-//		System.out.println("SEDS Processed:" + count);
-//
-//		return count;
-//	}
 
-//	@Bean
-//	@ConditionalOnProperty("aeo")
-//	public int processAeo() {
-//		int count = 0;
-//
-//		System.out.println("Processing AEO ...");
-//		if (aeo == 'h') {
-//			Utility.downloadHttpFile(Constants.AEO_HTTP, Constants.BULK_DATA);
-//			Utility.unzipFile(Constants.BULK_DATA + Constants.AEO_ZIP,
-//					Constants.BULK_DATA);
-//			LOGGER.debug("completed aeo download");
-//		}
-//		try (Stream<String> ls = Files.lines(Paths.get(Constants.BULK_DATA
-//				+ Constants.AEO_FILE))) {
-//			count = ls.map(p -> persistAeoSeries(p)).reduce(Integer::sum).get();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//		System.out.println("AEO Processed:" + count);
-//		return count;
-//	}
-
-//	private int persistSedsSeries(String text) {
-//		// find out series or category
-//		if (Utility.isSeries(text)) {
-//			SedsSeries ss1 = Utility.fromJson(text, SedsSeries.class);
-//			ss1.fillSedsData();
-//			LOGGER.debug(" series:" + ss1.getName() + " Random data: year="
-//					+ ss1.getSedData().iterator().next().getYear() + " data="
-//					+ ss1.getSedData().iterator().next().getData());
-//			sedsSeriesSvc.save(ss1);
-//		} else if (Utility.isCategory(text)) {
-//			Category cat = Utility.fromJson(text, Category.class);
-//			LOGGER.debug(" Category:" + cat.getName());
-//			categorySvc.save(cat);
-//		}
-//		return 1;
-//	}
 
 	@Bean
 	@ConditionalOnProperty("seds")
@@ -247,24 +177,6 @@ public class JsonReader {
 		}
 		return 1;
 	}
-
-//	private int persistAeoSeries(String text) {
-//		// find out series or category
-//		if (Utility.isSeries(text)) {
-//			AeoSeries ss = Utility.fromJson(text, AeoSeries.class);
-//			ss.fillChildData();
-//			ss.fillLevels();
-//			LOGGER.debug(" series:" + ss.getName() + " Random data: year="
-//					+ ss.getChildData().iterator().next().getYear() + " data="
-//					+ ss.getChildData().iterator().next().getData());
-//			aeoSeriesSvc.save(ss);
-//		} else if (Utility.isCategory(text)) {
-//			AeoCategory cat = Utility.fromJson(text, AeoCategory.class);
-//			LOGGER.debug(" AEO Category:" + cat.getName());
-//			aeoCategorySvc.save(cat);
-//		}
-//		return 1;
-//	}
 
 	/**
 	 * gets the manifest for all the zip files String manifest =

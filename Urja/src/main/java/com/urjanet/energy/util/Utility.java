@@ -20,12 +20,15 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.io.CharStreams;
@@ -44,6 +47,8 @@ public class Utility {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Utility.class);
 	private static Gson gson;
 	private static CloseableHttpClient hclient;
+	@Value("${proxy:n}")
+	private static char proxy;
 
 	@Autowired
 	private Gson thisGson;
@@ -115,6 +120,7 @@ public class Utility {
 		
 		String text = null;
 		HttpGet rateGet = new HttpGet(uri);
+		
 		try {
 			CloseableHttpResponse rateResponse = hclient.execute(rateGet);
 			HttpEntity rateEntity = rateResponse.getEntity();
@@ -137,6 +143,13 @@ public class Utility {
 		// find the file name from URI
 		String file = FilenameUtils.getName(uri);
 		HttpGet rateGet = new HttpGet(uri);
+		if (proxy == 'y'){
+			HttpHost proxy = new HttpHost("one.proxy.att.com", 8080, "http");
+			RequestConfig config = RequestConfig.custom()
+	                .setProxy(proxy)
+	                .build();
+			rateGet.setConfig(config);
+		}
 		rateGet.addHeader("Accept-Encoding", "deflate");
 		try {
 			CloseableHttpResponse rateResponse = hclient.execute(rateGet);
