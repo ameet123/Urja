@@ -3,10 +3,10 @@ package com.urjanet.energy;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +16,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.gson.Gson;
+import com.urjanet.energy.entity.AEOCategory;
+import com.urjanet.energy.entity.AEOSeries;
 import com.urjanet.energy.entity.AeoCategory;
 import com.urjanet.energy.entity.AeoSeries;
-import com.urjanet.energy.entity.Category;
 import com.urjanet.energy.entity.CoalCategory;
 import com.urjanet.energy.entity.CoalSeries;
 import com.urjanet.energy.entity.GenericSeries;
@@ -28,16 +29,14 @@ import com.urjanet.energy.entity.PetCategory;
 import com.urjanet.energy.entity.PetSeries;
 import com.urjanet.energy.entity.SedCategory;
 import com.urjanet.energy.entity.SedSeries;
-import com.urjanet.energy.entity.SedsSeries;
 import com.urjanet.energy.entity.Series;
 import com.urjanet.energy.entity.UtilityCompanies;
 import com.urjanet.energy.entity.UtilityRates;
 import com.urjanet.energy.json.BulkManifest;
 import com.urjanet.energy.json.UtilityCompaniesJson;
 import com.urjanet.energy.json.UtilityRatesJson;
-import com.urjanet.energy.service.AeoCategoryService;
-import com.urjanet.energy.service.AeoSeriesService;
-import com.urjanet.energy.service.CategoryService;
+import com.urjanet.energy.service.AEOCategoryService;
+import com.urjanet.energy.service.AEOService;
 import com.urjanet.energy.service.CoalCategoryService;
 import com.urjanet.energy.service.CoalService;
 import com.urjanet.energy.service.GenericCategoryService;
@@ -48,7 +47,6 @@ import com.urjanet.energy.service.PetCategoryService;
 import com.urjanet.energy.service.PetService;
 import com.urjanet.energy.service.SedCategoryService;
 import com.urjanet.energy.service.SedService;
-import com.urjanet.energy.service.SedsSeriesService;
 import com.urjanet.energy.service.SeriesService;
 import com.urjanet.energy.service.UtilityCompaniesService;
 import com.urjanet.energy.service.UtilityRatesService;
@@ -72,14 +70,14 @@ public class JsonReader {
 	private UtilityCompaniesService utilityCompSvc;
 	@Autowired
 	private SeriesService seriesSvs;
-	@Autowired
-	private SedsSeriesService sedsSeriesSvc;
-	@Autowired
-	private CategoryService categorySvc;
-	@Autowired
-	private AeoSeriesService aeoSeriesSvc;
-	@Autowired
-	private AeoCategoryService aeoCategorySvc;
+//	@Autowired
+//	private SedsSeriesService sedsSeriesSvc;
+//	@Autowired
+//	private CategoryService categorySvc;
+//	@Autowired
+//	private AeoSeriesService aeoSeriesSvc;
+//	@Autowired
+//	private AeoCategoryService aeoCategorySvc;
 	@Autowired
 	private CoalService coalSeriesSvc;
 	@Autowired
@@ -96,6 +94,10 @@ public class JsonReader {
 	private SedService sedSeriesSvc;
 	@Autowired
 	private SedCategoryService sedCategorySvc;
+	@Autowired
+	private AEOService aeoSeriesSvc;
+	@Autowired
+	private AEOCategoryService aeoCategorySvc;
 
 	@Autowired
 	private Gson gson;
@@ -106,90 +108,113 @@ public class JsonReader {
 	private char seds;
 	@Value("${aeo:n}")
 	private char aeo;
+	@Value("${pet:n}")
+	private char pet;
+	@Value("${ng:n}")
+	private char ng;
+	@Value("${coal:n}")
+	private char coal;
+
+//	@Bean
+//	@ConditionalOnProperty("seds")
+//	public int processSeds() throws IOException {
+//		int count = 0;
+//
+//		System.out.println("Processing seds bean...");
+//		if (seds == 'h') {
+//			Utility.downloadHttpFile(Constants.SEDS_HTTP, Constants.BULK_DATA);
+//			Utility.unzipFile(Constants.BULK_DATA + Constants.SEDS_ZIP,
+//					Constants.BULK_DATA);
+//			LOGGER.debug("completed seds download");
+//		}
+//
+//		try (Stream<String> ls = Files.lines(Paths.get(Constants.BULK_DATA
+//				+ Constants.SEDS_FILE))) {
+//			count = ls.map(p -> persistSedsSeries(p)).reduce(Integer::sum)
+//					.get();
+//		}
+//		System.out.println("SEDS Processed:" + count);
+//
+//		return count;
+//	}
+
+//	@Bean
+//	@ConditionalOnProperty("aeo")
+//	public int processAeo() {
+//		int count = 0;
+//
+//		System.out.println("Processing AEO ...");
+//		if (aeo == 'h') {
+//			Utility.downloadHttpFile(Constants.AEO_HTTP, Constants.BULK_DATA);
+//			Utility.unzipFile(Constants.BULK_DATA + Constants.AEO_ZIP,
+//					Constants.BULK_DATA);
+//			LOGGER.debug("completed aeo download");
+//		}
+//		try (Stream<String> ls = Files.lines(Paths.get(Constants.BULK_DATA
+//				+ Constants.AEO_FILE))) {
+//			count = ls.map(p -> persistAeoSeries(p)).reduce(Integer::sum).get();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//		System.out.println("AEO Processed:" + count);
+//		return count;
+//	}
+
+//	private int persistSedsSeries(String text) {
+//		// find out series or category
+//		if (Utility.isSeries(text)) {
+//			SedsSeries ss1 = Utility.fromJson(text, SedsSeries.class);
+//			ss1.fillSedsData();
+//			LOGGER.debug(" series:" + ss1.getName() + " Random data: year="
+//					+ ss1.getSedData().iterator().next().getYear() + " data="
+//					+ ss1.getSedData().iterator().next().getData());
+//			sedsSeriesSvc.save(ss1);
+//		} else if (Utility.isCategory(text)) {
+//			Category cat = Utility.fromJson(text, Category.class);
+//			LOGGER.debug(" Category:" + cat.getName());
+//			categorySvc.save(cat);
+//		}
+//		return 1;
+//	}
 
 	@Bean
 	@ConditionalOnProperty("seds")
-	public int processSeds() throws IOException {
-		int count = 0;
-
-		System.out.println("Processing seds bean...");
-		if (seds == 'h') {
-			Utility.downloadHttpFile(Constants.SEDS_HTTP, Constants.BULK_DATA);
-			Utility.unzipFile(Constants.BULK_DATA + Constants.SEDS_ZIP,
-					Constants.BULK_DATA);
-			LOGGER.debug("completed seds download");
-		}
-
-		try (Stream<String> ls = Files.lines(Paths.get(Constants.BULK_DATA
-				+ Constants.SEDS_FILE))) {
-			count = ls.map(p -> persistSedsSeries(p)).reduce(Integer::sum)
-					.get();
-		}
-		System.out.println("SEDS Processed:" + count);
-
-		return count;
+	public int processSEDS(){
+		return processSeriesAndCategory(Constants.BULK_DATA+Constants.SEDS_FILE, SedSeries.class, sedSeriesSvc, SedCategory.class, sedCategorySvc, seds, Constants.SEDS_HTTP);
 	}
-
 	@Bean
 	@ConditionalOnProperty("aeo")
-	public int processAeo() {
-		int count = 0;
-
-		System.out.println("Processing AEO ...");
-		if (aeo == 'h') {
-			Utility.downloadHttpFile(Constants.AEO_HTTP, Constants.BULK_DATA);
-			Utility.unzipFile(Constants.BULK_DATA + Constants.AEO_ZIP,
-					Constants.BULK_DATA);
-			LOGGER.debug("completed aeo download");
-		}
-		try (Stream<String> ls = Files.lines(Paths.get(Constants.BULK_DATA
-				+ Constants.AEO_FILE))) {
-			count = ls.map(p -> persistAeoSeries(p)).reduce(Integer::sum).get();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		System.out.println("AEO Processed:" + count);
-		return count;
-	}
-
-	private int persistSedsSeries(String text) {
-		// find out series or category
-		if (Utility.isSeries(text)) {
-			SedsSeries ss1 = Utility.fromJson(text, SedsSeries.class);
-			ss1.fillSedsData();
-			LOGGER.debug(" series:" + ss1.getName() + " Random data: year="
-					+ ss1.getSedData().iterator().next().getYear() + " data="
-					+ ss1.getSedData().iterator().next().getData());
-			sedsSeriesSvc.save(ss1);
-		} else if (Utility.isCategory(text)) {
-			Category cat = Utility.fromJson(text, Category.class);
-			LOGGER.debug(" Category:" + cat.getName());
-			categorySvc.save(cat);
-		}
-		return 1;
-	}
-
-	@Bean
-	public int processSEDS(){
-		return processSeriesAndCategory(Constants.BULK_DATA+Constants.SEDS_FILE, SedSeries.class, sedSeriesSvc, SedCategory.class, sedCategorySvc);
+	public int processAEO(){
+		return processSeriesAndCategory(Constants.BULK_DATA+Constants.AEO_FILE, AEOSeries.class, aeoSeriesSvc, AEOCategory.class, aeoCategorySvc, aeo, Constants.AEO_HTTP);
 	}
 	@Bean
+	@ConditionalOnProperty("ng")
 	public int processNG(){
-		return processSeriesAndCategory(Constants.BULK_DATA+Constants.NG_FILE, NgSeries.class, ngSeriesSvc, NgCategory.class, ngCategorySvc);
+		return processSeriesAndCategory(Constants.BULK_DATA+Constants.NG_FILE, NgSeries.class, ngSeriesSvc, NgCategory.class, ngCategorySvc, ng, Constants.NG_HTTP);
 	}
 	@Bean
+	@ConditionalOnProperty("pet")
 	public int processPET(){
-		return processSeriesAndCategory(Constants.BULK_DATA+Constants.PET_FILE, PetSeries.class, petSeriesSvc, PetCategory.class, petCategorySvc);
+		return processSeriesAndCategory(Constants.BULK_DATA+Constants.PET_FILE, PetSeries.class, petSeriesSvc, PetCategory.class, petCategorySvc, pet, Constants.PET_HTTP);
 	}
 	@Bean
+	@ConditionalOnProperty("coal")
 	public int processCOAL(){
-		return processSeriesAndCategory(Constants.BULK_DATA+Constants.COAL_FILE, CoalSeries.class, coalSeriesSvc, CoalCategory.class, coalCategorySvc);
+		return processSeriesAndCategory(Constants.BULK_DATA+Constants.COAL_FILE, CoalSeries.class, coalSeriesSvc, CoalCategory.class, coalCategorySvc, coal, Constants.COAL_HTTP);
 	}
 
 	public <T extends GenericSeries, J> int processSeriesAndCategory(String file,
 			Class<? extends GenericSeries> T, GenericService<T> gsvc,
-			Class<?> J, GenericCategoryService<J> gCatSvc) {
+			Class<?> J, GenericCategoryService<J> gCatSvc, char signal, String uri) {		
 		int i = 0;
+		// ascertain the decompression process requirement
+		System.out.println("Processing " + T.getSimpleName()+" ...");
+		if (signal == 'h') {
+			Utility.downloadHttpFile(uri, Constants.BULK_DATA);
+			Utility.unzipFile(Constants.BULK_DATA + FilenameUtils.getName(uri),
+					Constants.BULK_DATA);
+			LOGGER.debug("completed "+ FilenameUtils.getName(uri)+" download");
+		}
 
 		try(Stream<String> ls = Files.lines(Paths.get(file))){
 			i = ls.map(p -> persistGenericSeries(p, T, gsvc, J, gCatSvc)).reduce(Integer::sum).get();
@@ -223,23 +248,23 @@ public class JsonReader {
 		return 1;
 	}
 
-	private int persistAeoSeries(String text) {
-		// find out series or category
-		if (Utility.isSeries(text)) {
-			AeoSeries ss = Utility.fromJson(text, AeoSeries.class);
-			ss.fillChildData();
-			ss.fillLevels();
-			LOGGER.debug(" series:" + ss.getName() + " Random data: year="
-					+ ss.getChildData().iterator().next().getYear() + " data="
-					+ ss.getChildData().iterator().next().getData());
-			aeoSeriesSvc.save(ss);
-		} else if (Utility.isCategory(text)) {
-			AeoCategory cat = Utility.fromJson(text, AeoCategory.class);
-			LOGGER.debug(" AEO Category:" + cat.getName());
-			aeoCategorySvc.save(cat);
-		}
-		return 1;
-	}
+//	private int persistAeoSeries(String text) {
+//		// find out series or category
+//		if (Utility.isSeries(text)) {
+//			AeoSeries ss = Utility.fromJson(text, AeoSeries.class);
+//			ss.fillChildData();
+//			ss.fillLevels();
+//			LOGGER.debug(" series:" + ss.getName() + " Random data: year="
+//					+ ss.getChildData().iterator().next().getYear() + " data="
+//					+ ss.getChildData().iterator().next().getData());
+//			aeoSeriesSvc.save(ss);
+//		} else if (Utility.isCategory(text)) {
+//			AeoCategory cat = Utility.fromJson(text, AeoCategory.class);
+//			LOGGER.debug(" AEO Category:" + cat.getName());
+//			aeoCategorySvc.save(cat);
+//		}
+//		return 1;
+//	}
 
 	/**
 	 * gets the manifest for all the zip files String manifest =

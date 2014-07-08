@@ -16,18 +16,16 @@ import javax.persistence.Table;
 import com.google.gson.annotations.SerializedName;
 
 @Entity
-@Table(name = "urja_category")
-@SequenceGenerator(name = "idSeqGen", sequenceName = "SEQ_URJA_CATEGORY")
-public class Category {
+@Table(name = "urja_aeo_category")
+@SequenceGenerator(name = "idSeqGen", sequenceName = "SEQ_URJA_AEO_CATEGORY")
+public class AEOCategory {
 	@Id
 	@GeneratedValue(generator = "idSeqGen", strategy = GenerationType.AUTO)
 	private Long id;
 
 	@Column(name = "category_id")
 	@SerializedName("category_id")
-	// this is for JSON, this is what appears in the file
-	private String categoryId; // this is what WE(java/this Class) would like to
-								// call it by
+	private String categoryId;
 
 	@Column(name = "parent_category_id")
 	@SerializedName("parent_category_id")
@@ -37,7 +35,7 @@ public class Category {
 	private String notes;
 
 	@ElementCollection
-	@CollectionTable(name = "urja_category_childseries", joinColumns = @JoinColumn(name = "category_id"))
+	@CollectionTable(name = "urja_aeo_category_childseries", joinColumns = @JoinColumn(name = "aeo_category_id"))
 	@Column(name = "child_series_id")
 	@SerializedName("childseries")
 	private List<String> childSeries;
