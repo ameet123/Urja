@@ -104,6 +104,10 @@ public class JsonReader {
 	private char coal;
 	@Value("${manifest:n}")
 	private char manifest;
+	@Value("${utilRates:f}")
+	private char utilRates;
+	@Value("${utilCompanies:f}")
+	private char utilCompanies;
 
 	@Bean
 	@ConditionalOnProperty("seds")
@@ -235,7 +239,12 @@ public class JsonReader {
 		String text = null;
 		int i = 0;
 
-		text = Utility.fetchHttp(ApiConstants.UTIL_RATE_JSON_API);
+		if (utilRates == 'f'){
+			text = Utility.fetchFromFile(ApiConstants.UTIL_RATE_JSON_FILE);
+		} else if (utilRates == 'h'){
+			text = Utility.fetchHttp(ApiConstants.UTIL_RATE_JSON_API);
+		}
+		
 
 		UtilityRatesJson ur = Utility.fromJson(text, UtilityRatesJson.class);
 		System.out.println("Total rec:" + ur.getItems().length);
@@ -260,8 +269,12 @@ public class JsonReader {
 	public int processUtilityCompanies() {
 		String text = null;
 		int i = 0;
-		text = Utility.fetchHttp(ApiConstants.UTIL_COMP_JSON_API);
-
+		
+		if (utilCompanies == 'f'){
+			text = Utility.fetchFromFile(ApiConstants.UTIL_COMP_JSON_FILE);
+		} else if (utilCompanies == 'h'){
+			text = Utility.fetchHttp(ApiConstants.UTIL_COMP_JSON_API);
+		}
 		UtilityCompaniesJson ur = Utility.fromJson(text,
 				UtilityCompaniesJson.class);
 		System.out.println("Total rec:" + ur.getItems().length);
