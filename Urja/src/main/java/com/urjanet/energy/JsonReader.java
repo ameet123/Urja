@@ -92,8 +92,6 @@ public class JsonReader {
 	@Autowired
 	private Gson gson;
 
-	@Value("${fetch}")
-	private char fetchMechanism;
 	@Value("${seds:n}")
 	private char seds;
 	@Value("${aeo:n}")
@@ -104,55 +102,73 @@ public class JsonReader {
 	private char ng;
 	@Value("${coal:n}")
 	private char coal;
-
-
+	@Value("${manifest:n}")
+	private char manifest;
 
 	@Bean
 	@ConditionalOnProperty("seds")
-	public int processSEDS(){
-		return processSeriesAndCategory(Constants.BULK_DATA+Constants.SEDS_FILE, SedSeries.class, sedSeriesSvc, SedCategory.class, sedCategorySvc, seds, Constants.SEDS_HTTP);
-	}
-	@Bean
-	@ConditionalOnProperty("aeo")
-	public int processAEO(){
-		return processSeriesAndCategory(Constants.BULK_DATA+Constants.AEO_FILE, AEOSeries.class, aeoSeriesSvc, AEOCategory.class, aeoCategorySvc, aeo, Constants.AEO_HTTP);
-	}
-	@Bean
-	@ConditionalOnProperty("ng")
-	public int processNG(){
-		return processSeriesAndCategory(Constants.BULK_DATA+Constants.NG_FILE, NgSeries.class, ngSeriesSvc, NgCategory.class, ngCategorySvc, ng, Constants.NG_HTTP);
-	}
-	@Bean
-	@ConditionalOnProperty("pet")
-	public int processPET(){
-		return processSeriesAndCategory(Constants.BULK_DATA+Constants.PET_FILE, PetSeries.class, petSeriesSvc, PetCategory.class, petCategorySvc, pet, Constants.PET_HTTP);
-	}
-	@Bean
-	@ConditionalOnProperty("coal")
-	public int processCOAL(){
-		return processSeriesAndCategory(Constants.BULK_DATA+Constants.COAL_FILE, CoalSeries.class, coalSeriesSvc, CoalCategory.class, coalCategorySvc, coal, Constants.COAL_HTTP);
+	public int processSEDS() {
+		return processSeriesAndCategory(Constants.BULK_DATA
+				+ Constants.SEDS_FILE, SedSeries.class, sedSeriesSvc,
+				SedCategory.class, sedCategorySvc, seds, Constants.SEDS_HTTP);
 	}
 
-	public <T extends GenericSeries, J> int processSeriesAndCategory(String file,
-			Class<? extends GenericSeries> T, GenericService<T> gsvc,
-			Class<?> J, GenericCategoryService<J> gCatSvc, char signal, String uri) {		
+	@Bean
+	@ConditionalOnProperty("aeo")
+	public int processAEO() {
+		return processSeriesAndCategory(Constants.BULK_DATA
+				+ Constants.AEO_FILE, AEOSeries.class, aeoSeriesSvc,
+				AEOCategory.class, aeoCategorySvc, aeo, Constants.AEO_HTTP);
+	}
+
+	@Bean
+	@ConditionalOnProperty("ng")
+	public int processNG() {
+		return processSeriesAndCategory(
+				Constants.BULK_DATA + Constants.NG_FILE, NgSeries.class,
+				ngSeriesSvc, NgCategory.class, ngCategorySvc, ng,
+				Constants.NG_HTTP);
+	}
+
+	@Bean
+	@ConditionalOnProperty("pet")
+	public int processPET() {
+		return processSeriesAndCategory(Constants.BULK_DATA
+				+ Constants.PET_FILE, PetSeries.class, petSeriesSvc,
+				PetCategory.class, petCategorySvc, pet, Constants.PET_HTTP);
+	}
+
+	@Bean
+	@ConditionalOnProperty("coal")
+	public int processCOAL() {
+		return processSeriesAndCategory(Constants.BULK_DATA
+				+ Constants.COAL_FILE, CoalSeries.class, coalSeriesSvc,
+				CoalCategory.class, coalCategorySvc, coal, Constants.COAL_HTTP);
+	}
+
+	public <T extends GenericSeries, J> int processSeriesAndCategory(
+			String file, Class<? extends GenericSeries> T,
+			GenericService<T> gsvc, Class<?> J,
+			GenericCategoryService<J> gCatSvc, char signal, String uri) {
 		int i = 0;
 		// ascertain the decompression process requirement
-		System.out.println("Processing " + T.getSimpleName()+" ...");
+		System.out.println("Processing " + T.getSimpleName() + " ...");
 		if (signal == 'h') {
 			Utility.downloadHttpFile(uri, Constants.BULK_DATA);
 			Utility.unzipFile(Constants.BULK_DATA + FilenameUtils.getName(uri),
 					Constants.BULK_DATA);
-			LOGGER.debug("completed "+ FilenameUtils.getName(uri)+" download");
+			LOGGER.debug("completed " + FilenameUtils.getName(uri)
+					+ " download");
 		}
 
-		try(Stream<String> ls = Files.lines(Paths.get(file))){
-			i = ls.map(p -> persistGenericSeries(p, T, gsvc, J, gCatSvc)).reduce(Integer::sum).get();
+		try (Stream<String> ls = Files.lines(Paths.get(file))) {
+			i = ls.map(p -> persistGenericSeries(p, T, gsvc, J, gCatSvc))
+					.reduce(Integer::sum).get();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println(T.getSimpleName()+" Processed:"+i);
+		System.out.println(T.getSimpleName() + " Processed:" + i);
 		return i;
 	}
 
@@ -170,7 +186,6 @@ public class JsonReader {
 					+ " data=" + ss.getChildData().iterator().next().getData());
 			gsvc.save(ss);
 		} else if (Utility.isCategory(text)) {
-			System.out.println("Found category");
 			@SuppressWarnings("unchecked")
 			J cat = (J) Utility.fromJson(text, J);
 			gCatSvc.save(cat);
@@ -190,21 +205,20 @@ public class JsonReader {
 	public int processEiaManifest() {
 		String text;
 		int i = 0;
-		if (fetchMechanism == 'h') {
-			text = Utility.fetchHttp(Constants.MANIFEST_HTTP);
-			LOGGER.debug("First few lines:" + text.substring(0, 200));
+		text = Utility.fetchHttp(Constants.MANIFEST_HTTP);
+		LOGGER.debug("First few lines:" + text.substring(0, 200));
 
-			BulkManifest bm = Utility.fromJson(text, BulkManifest.class);
-			System.out.println(bm.getDataset().size());
-			for (Entry<String, Series> e : bm.getDataset().entrySet()) {
-				LOGGER.debug("key=>" + e.getKey() + " val=>"
-						+ e.getValue().getIdentifier());
-				Series sr = e.getValue();
-				seriesSvs.save(sr);
-				i++;
-				System.out.println("AccessURL:" + sr.getAccessURL());
-			}
+		BulkManifest bm = Utility.fromJson(text, BulkManifest.class);
+		System.out.println(bm.getDataset().size());
+		for (Entry<String, Series> e : bm.getDataset().entrySet()) {
+			LOGGER.debug("key=>" + e.getKey() + " val=>"
+					+ e.getValue().getIdentifier());
+			Series sr = e.getValue();
+			seriesSvs.save(sr);
+			i++;
+			System.out.println("AccessURL:" + sr.getAccessURL());
 		}
+
 		System.out.println("Total files in manifest:" + i);
 		return i;
 	}
@@ -220,18 +234,16 @@ public class JsonReader {
 
 		String text = null;
 		int i = 0;
-		if (fetchMechanism == 'h') {
-			text = Utility.fetchHttp(ApiConstants.UTIL_RATE_JSON_API);
 
-			UtilityRatesJson ur = Utility
-					.fromJson(text, UtilityRatesJson.class);
-			System.out.println("Total rec:" + ur.getItems().length);
+		text = Utility.fetchHttp(ApiConstants.UTIL_RATE_JSON_API);
 
-			for (UtilityRates rate : ur.getItems()) {
-				this.utilityRateSvc.save(rate);
-				if (++i % 100 == 0) {
-					System.out.println("Saved row:" + i);
-				}
+		UtilityRatesJson ur = Utility.fromJson(text, UtilityRatesJson.class);
+		System.out.println("Total rec:" + ur.getItems().length);
+
+		for (UtilityRates rate : ur.getItems()) {
+			this.utilityRateSvc.save(rate);
+			if (++i % 100 == 0) {
+				System.out.println("Saved row:" + i);
 			}
 		}
 		return i;
@@ -248,18 +260,16 @@ public class JsonReader {
 	public int processUtilityCompanies() {
 		String text = null;
 		int i = 0;
-		if (fetchMechanism == 'h') {
-			text = Utility.fetchHttp(ApiConstants.UTIL_COMP_JSON_API);
+		text = Utility.fetchHttp(ApiConstants.UTIL_COMP_JSON_API);
 
-			UtilityCompaniesJson ur = Utility.fromJson(text,
-					UtilityCompaniesJson.class);
-			System.out.println("Total rec:" + ur.getItems().length);
+		UtilityCompaniesJson ur = Utility.fromJson(text,
+				UtilityCompaniesJson.class);
+		System.out.println("Total rec:" + ur.getItems().length);
 
-			for (UtilityCompanies comp : ur.getItems()) {
-				this.utilityCompSvc.save(comp);
-				if (++i % 100 == 0) {
-					System.out.println("Saved row:" + i);
-				}
+		for (UtilityCompanies comp : ur.getItems()) {
+			this.utilityCompSvc.save(comp);
+			if (++i % 100 == 0) {
+				System.out.println("Saved row:" + i);
 			}
 		}
 		return i;

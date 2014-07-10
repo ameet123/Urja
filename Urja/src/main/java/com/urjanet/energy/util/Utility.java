@@ -91,6 +91,7 @@ public class Utility {
 				dest.close();
 			}
 			zis.close();
+			System.out.println("Unzipping completed:"+source);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -157,6 +158,7 @@ public class Utility {
 			OutputStream outputStream = new FileOutputStream(destination+file);	
 			IOUtils.copy(rateEntity.getContent(), outputStream);
 			outputStream.close();
+			System.out.println("File download completed:"+uri);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
